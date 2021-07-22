@@ -8,4 +8,6 @@ The project will try to address the question of what type of optimisations offer
 
 Ideally the research will be able to aid authors of tracing JITs to construct highly refined last layers of optimisation, with or without LLVM.
 
+All code for the LLVM backend can be found at 'rpython/jit/backend/llvm/'
+
 For information on PyPy specifically, see https://www.pypy.org/
