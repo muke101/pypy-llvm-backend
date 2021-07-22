@@ -1,0 +1,130 @@
+""" All the operations are desribed like this:
+
+NAME/no-of-args-or-*[b][d]/types-of-result
+
+if b is present it means the operation produces a boolean
+if d is present it means there is a descr
+type of result can be one or more of r i f n
+"""
+'GUARD_CLASS/2d/n',
+'GUARD_NONNULL_CLASS/2d/n',
+'GUARD_GC_TYPE/2d/n',       # only if supports_guard_gc_type
+'GUARD_IS_OBJECT/1d/n',     # only if supports_guard_gc_type
+'GUARD_SUBCLASS/2d/n',      # only if supports_guard_gc_type
+'GUARD_NO_EXCEPTION/0d/n',   # may be called with an exception currently set
+'GUARD_EXCEPTION/1d/r',     # XXX kill me, use only SAVE_EXCEPTION
+'GUARD_NOT_FORCED/0d/n',      # may be called with an exception currently set
+'GUARD_NOT_FORCED_2/0d/n',    # same as GUARD_NOT_FORCED, but for finish()
+'GUARD_NOT_INVALIDATED/0d/n',
+'GUARD_FUTURE_CONDITION/0d/n',
+
+'SAME_AS/1/ifr',      # gets a Const or a Box, turns it into another Box
+#
+'INSTANCE_PTR_EQ/2b/i',
+'INSTANCE_PTR_NE/2b/i',
+'NURSERY_PTR_INCREMENT/2/r',
+#
+'ARRAYLEN_GC/1d/i',
+'STRLEN/1/i',
+'STRGETITEM/2/i',
+'GETARRAYITEM_GC_PURE/2d/rfi',
+'UNICODELEN/1/i',
+'UNICODEGETITEM/2/i',
+#
+'LOAD_FROM_GC_TABLE/1/r',    # only emitted by rewrite.py
+'LOAD_EFFECTIVE_ADDRESS/4/i', # only emitted by rewrite.py, only if
+# cpu.supports_load_effective_address. [v_gcptr,v_index,c_baseofs,c_shift]
+# res = arg0 + (arg1 << arg3) + arg2
+#
+'_ALWAYS_PURE_LAST',  # ----- end of always_pure operations -----
+
+# parameters GC_LOAD
+# 1: pointer to complex object
+# 2: integer describing the offset
+# 3: constant integer. byte size of datatype to load (negative if it is signed)
+'GC_LOAD/3/rfi',
+# parameters GC_LOAD_INDEXED
+# 1: pointer to complex object
+# 2: integer describing the index
+# 3: constant integer scale factor
+# 4: constant integer base offset   (final offset is 'base + scale * index')
+# 5: constant integer. byte size of datatype to load (negative if it is signed)
+# (GC_LOAD is equivalent to GC_LOAD_INDEXED with arg3==1, arg4==0)
+'GC_LOAD_INDEXED/5/rfi',
+
+'_RAW_LOAD_FIRST',
+'GETARRAYITEM_GC/2d/rfi',
+'GETARRAYITEM_RAW/2d/fi',
+'RAW_LOAD/2d/fi',
+'_RAW_LOAD_LAST',
+
+'GETINTERIORFIELD_GC/2d/rfi',
+'GETFIELD_GC/1d/rfi',
+'GETFIELD_RAW/1d/rfi',
+'_MALLOC_FIRST',
+'NEWSTR/1/r',         #-> STR, the hash field is zeroed
+'NEWUNICODE/1/r',     #-> UNICODE, the hash field is zeroed
+'_MALLOC_LAST',
+'STRHASH/1/i',        # only reading the .hash field, might be zero so far
+'UNICODEHASH/1/i',    #     (unless applied on consts, where .hash is forced)
+# this one has no *visible* side effect, since the virtualizable
+# must be forced, however we need to execute it anyway
+'_NOSIDEEFFECT_LAST', # ----- end of no_side_effect operations -----
+
+# same paramters as GC_LOAD, but one additional for the value to store
+# note that the itemsize is not signed (always > 0)
+# (gcptr, index, value, [scale, base_offset,] itemsize)
+# invariants for GC_STORE: index is constant, but can be large
+# invariants for GC_STORE_INDEXED: index is a non-constant box;
+#                                  scale is a constant;
+#                                  base_offset is a small constant
+'GC_STORE/4d/n',
+'GC_STORE_INDEXED/6d/n',
+
+'INCREMENT_DEBUG_COUNTER/1/n',
+'_RAW_STORE_FIRST',
+'SETARRAYITEM_GC/3d/n',
+'SETARRAYITEM_RAW/3d/n',
+'RAW_STORE/3d/n',
+'_RAW_STORE_LAST',
+'SETINTERIORFIELD_GC/3d/n',
+'SETINTERIORFIELD_RAW/3d/n',    # right now, only used by tests
+'SETFIELD_GC/2d/n',
+'ZERO_ARRAY/5d/n',  # only emitted by the rewrite, clears (part of) an array
+                    # [arraygcptr, firstindex, length, scale_firstindex,
+                    #  scale_length], descr=ArrayDescr
+'SETFIELD_RAW/2d/n',
+'STRSETITEM/3/n',
+'UNICODESETITEM/3/n',
+'COND_CALL_GC_WB/1d/n',       # [objptr] (for the write barrier)
+'COND_CALL_GC_WB_ARRAY/2d/n', # [objptr, arrayindex] (write barr. for array)
+'_JIT_DEBUG_FIRST',
+'DEBUG_MERGE_POINT/*/n',      # debugging only
+'ENTER_PORTAL_FRAME/2/n',     # debugging only
+'LEAVE_PORTAL_FRAME/1/n',     # debugging only
+'JIT_DEBUG/*/n',              # debugging only
+'_JIT_DEBUG_LAST',
+'ESCAPE/*/rfin',              # tests only
+'FORCE_SPILL/1/n',            # tests only
+'VIRTUAL_REF_FINISH/2/n',   # removed before it's passed to the backend
+'COPYSTRCONTENT/5/n',       # src, dst, srcstart, dststart, length
+'COPYUNICODECONTENT/5/n',
+'QUASIIMMUT_FIELD/1d/n',    # [objptr], descr=SlowMutateDescr
+'ASSERT_NOT_NONE/1/n',      # [objptr]
+'RECORD_EXACT_CLASS/2/n',   # [objptr, clsptr]
+'KEEPALIVE/1/n',
+'SAVE_EXCEPTION/0/r',
+'SAVE_EXC_CLASS/0/i',       # XXX kill me
+'RESTORE_EXCEPTION/2/n',    # XXX kill me
+
+'CALL_ASSEMBLER/*d/rfin',  # call already compiled assembler
+'CALL_MAY_FORCE/*d/rfin',
+'CALL_LOOPINVARIANT/*d/rfin',
+'CALL_RELEASE_GIL/*d/fin',  # release the GIL around the call
+'CHECK_MEMORY_ERROR/1/n',   # after a CALL: NULL => propagate MemoryError
+'CALL_MALLOC_NURSERY/1/r',  # nursery malloc, const number of bytes, zeroed
+'CALL_MALLOC_NURSERY_VARSIZE/3d/r',
+'CALL_MALLOC_NURSERY_VARSIZE_FRAME/1/r',
+# nursery malloc, non-const number of bytes, zeroed
+# note that the number of bytes must be well known to be small enough
+# to fulfill allocating in the nursery rules (and no card markings)

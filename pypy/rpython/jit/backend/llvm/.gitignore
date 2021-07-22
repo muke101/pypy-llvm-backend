@@ -1,0 +1,3 @@
+*.so
+llvm_wrapper/a.out
+*.ll
