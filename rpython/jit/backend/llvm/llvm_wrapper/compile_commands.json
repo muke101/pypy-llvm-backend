@@ -1,0 +1,10 @@
+[
+	{
+		"arguments": [
+			"-I/usr/lib/llvm/12/include  -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS",
+			"-lLLVM-12",
+			"-L/usr/lib/llvm/12/lib64",
+			"-I/usr/lib/llvm/12/include -std=c++14    -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
+		]
+	}
+]
